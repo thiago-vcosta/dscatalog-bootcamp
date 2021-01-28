@@ -99,6 +99,10 @@ public class Product implements Serializable {
 		this.date = date;
 	}
 
+	public Set<Category> getCategories() {
+		return categories;
+	}
+
 	public void setCategories(Set<Category> categories) {
 		this.categories = categories;
 	}
