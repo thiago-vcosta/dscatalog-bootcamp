@@ -9,11 +9,11 @@
 		<version>2.4.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.testepom</groupId>
-	<artifactId>TestePom</artifactId>
+	<groupId>com.devsuperior</groupId>
+	<artifactId>dscatalog</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>TestePom</name>
-	<description>Demo project for Spring Boot</description>
+	<name>dscatalog</name>
+	<description>DsCatalog Bootcamp DevSuperior</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
