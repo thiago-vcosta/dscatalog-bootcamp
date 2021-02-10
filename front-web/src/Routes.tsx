@@ -6,6 +6,7 @@ import Catalog from './pages/Catalog';
 import ProductDetails from './pages/Catalog/components/ProductDetails';
 import Home from './pages/Home';
 
+
 const Routes = () => (
   <BrowserRouter>
     <Navbar />
@@ -19,14 +20,12 @@ const Routes = () => (
       <Route path="/products/:productId">
         <ProductDetails />
       </Route>
+      <Redirect from="admin" to="/admin/products" exact/>
       <Route path="/admin">
-        <Redirect to="/admin/products" />
         <Admin />
       </Route>
-
     </Switch>
   </BrowserRouter>
-
 );
 
 export default Routes;
