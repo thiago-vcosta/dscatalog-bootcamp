@@ -6,9 +6,10 @@ import { Link } from 'react-router-dom';
 
 type Props = {
   product: Product;
+  onRemove: (productId: number) => void;
 }
 
-const Card = ({ product }: Props) => {
+const Card = ({ product, onRemove }: Props) => {
   return (
     <div className="card-base-10 product-card-admin">
       <div className="row">
@@ -25,21 +26,22 @@ const Card = ({ product }: Props) => {
           <ProductPrice price={product.price} />
           <div>
             {product.categories.map(category => (
-              <span className="badge badge-pill badge-secondary mr-2">{category}</span>
-            ))}-
+              <span className="badge badge-pill badge-secondary mr-2">{category.name}</span>
+            ))}
           </div>
         </div>
         <div className="col-3 pt-3 pr-5">
           <Link
             to={`/admin/products/${product.id}`}
             type="button"
-            className="btn btn-outline-secondary btn-block border-radius-10 mb-3 btn-edit"
+            className="btn btn-outline-secondary btn-block border-radius-10 mb-3"
           >
             EDITAR
             </Link>
           <button
             type="button"
             className="btn btn-outline-danger btn-block border-radius-10"
+            onClick={() => onRemove(product.id)}
           >
             EXCLUIR
             </button>

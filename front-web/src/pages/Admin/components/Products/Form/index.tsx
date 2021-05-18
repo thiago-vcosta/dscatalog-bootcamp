@@ -1,16 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makePrivateRequest, makeRequest } from 'core/utils/request';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import Select from 'react-select'
 import { useHistory, useParams } from 'react-router';
 import BaseForm from '../../BaseForm';
+import { Category } from 'core/types/Product';
 import './styles.scss';
+import PriceField from './PriceField';
+import ImageUpload from '../ImageUpload';
 
-type FormState = {
+export type FormState = {
   name: string;
   price: string;
   description: string;
   imgUrl: string;
+  categories: Category[];
 }
 
 type ParamsType = {
@@ -18,9 +23,13 @@ type ParamsType = {
 }
 
 const Form = () => {
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormState>();
+  const { register, handleSubmit, setValue, control, formState: { errors } } = useForm<FormState>();
   const history = useHistory();
   const { productId } = useParams<ParamsType>();
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [uploadedImgUrl, setUploadedImgUrl] = useState('');
+  const [productImgUrl, setProductImgUrl] = useState('');
   const isEditing = productId !== 'create';
   const formTitle = isEditing ? 'Editar produto' : 'Cadastrar um produto';
 
@@ -32,16 +41,30 @@ const Form = () => {
           setValue('name', response.data.name);
           setValue('price', response.data.price);
           setValue('description', response.data.description);
-          setValue('imgUrl', response.data.imgUrl);
+          setValue('categories', response.data.categories)
+          setProductImgUrl(response.data.imgUrl);
         })
     }
   }, [productId, isEditing, setValue]);
 
+  useEffect(() => {
+    setIsLoadingCategories(true);
+    makeRequest({ url: '/categories' })
+      .then(response => setCategories(response.data.content))
+      .finally(() => setIsLoadingCategories(false));
+  }, []);
+
   const onSubmit = (data: FormState) => {
+    const payload = {
+      ...data,
+      imgUrl: uploadedImgUrl || productImgUrl
+    }
+
+
     makePrivateRequest({
       url: isEditing ? `/products/${productId}` : '/products',
       method: isEditing ? 'PUT' : 'POST',
-      data
+      data: payload
     })
       .then(() => {
         toast.info('Produto salvo com sucesso!');
@@ -50,6 +73,10 @@ const Form = () => {
       .catch(() => {
         toast.error('Erro ao salvar o produto');
       })
+  }
+
+  const onUploadSuccess = (imgUrl: string) => {
+    setUploadedImgUrl(imgUrl);
   }
 
   return (
@@ -61,11 +88,12 @@ const Form = () => {
           <div className="col-6">
             <div className="margin-bottom-30">
               <input
-                {...register('name', {
+                ref={register({
                   required: "Campo obrigatório",
                   minLength: { value: 5, message: 'O campo deve ter no mínimo 5 caracteres' },
                   maxLength: { value: 60, message: 'O campo deve ter no máximo 60 caracteres' },
                 })}
+                name="name"
                 type="text"
                 className="form-control input-base"
                 placeholder="Nome do produto"
@@ -77,12 +105,28 @@ const Form = () => {
               )}
             </div>
             <div className="margin-bottom-30">
-              <input
-                {...register('price', { required: "Campo obrigatório" })}
-                type="number"
-                className="form-control input-base"
-                placeholder="Preço do produto"
+              <Controller
+                as={Select}
+                defaultValue=""
+                name="categories"
+                rules={{ required: true }}
+                control={control}
+                isLoading={isLoadingCategories}
+                options={categories}
+                getOptionLabel={(option: Category) => option.name}
+                getOptionValue={(option: Category) => String(option.id)}
+                classNamePrefix="categories-select"
+                placeholder="Categorias"
+                isMulti
               />
+              {errors.categories && (
+                <div className="invalid-feedback d-block">
+                  Campo obrigatório
+                </div>
+              )}
+            </div>
+            <div className="margin-bottom-30">
+              <PriceField control={control} />
               {errors.price && (
                 <div className="invalid-feedback d-block">
                   {errors.price.message}
@@ -90,22 +134,16 @@ const Form = () => {
               )}
             </div>
             <div className="margin-bottom-30">
-              <input
-                {...register('imgUrl', { required: "Campo obrigatório" })}
-                type="text"
-                className="form-control input-base"
-                placeholder="Imagem do produto"
+              <ImageUpload
+                onUploadSuccess={onUploadSuccess}
+                productImgUrl={productImgUrl}
               />
-              {errors.imgUrl && (
-                <div className="invalid-feedback d-block">
-                  {errors.imgUrl.message}
-                </div>
-              )}
             </div>
           </div>
           <div className="col-6">
             <textarea
-              {...register('description', { required: "Campo obrigatório" })}
+              ref={register({ required: "Campo obrigatório" })}
+              name="description"
               className="form-control input-base"
               placeholder="Descrição"
               cols={30}

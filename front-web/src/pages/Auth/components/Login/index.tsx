@@ -47,14 +47,15 @@ const Login = () => {
         <div className="margin-bottom-30">
           <input
             type="email"
+            name="username"
             className={`form-control input-base ${errors.username ? 'is-invalid' : ''}`}
             placeholder="Email"
-            {...register("username", {
+            ref={register({
               required: "Campo obrigatório",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                 message: "Email inválido"
-              }
+              }              
             })}
           />
           {errors.username && (
@@ -66,9 +67,10 @@ const Login = () => {
         <div className="margin-bottom-30">
           <input
             type="password"
+            name="password"
             className={`form-control input-base ${errors.password ? 'is-invalid' : ''}`}
             placeholder="Senha"
-            {...register('password', { required: "Campo obrigatório" })}
+            ref={register({ required: "Campo obrigatório" })}
           />
           {errors.password && (
             <div className="invalid-feedback d-block">
